@@ -1,0 +1,39 @@
+<div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-lg font-semibold">Detalhes da Consulta</h3>
+        <button id="close-appointment-modal" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="p-6">
+        <div class="space-y-4">
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Paciente</h4>
+                <p id="appointment-detail-patient" class="text-lg font-medium">João da Silva</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Médico</h4>
+                <p id="appointment-detail-doctor" class="text-lg font-medium">Dr. Roberto Silva (Cardiologia)</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Data</h4>
+                    <p id="appointment-detail-date" class="text-lg font-medium">16/06/2023</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Hora</h4>
+                    <p id="appointment-detail-time" class="text-lg font-medium">15:30</p>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Status</h4>
+                <p id="appointment-detail-status" class="text-lg font-medium">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-end border-t p-4">
+        <button id="close-appointment-detail" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button>
+    </div>
+</div>

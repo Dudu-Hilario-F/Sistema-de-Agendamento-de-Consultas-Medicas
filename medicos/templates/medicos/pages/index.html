@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSchedule - Sistema de Agendamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'static_global/css/dashboard_medicos/medicos_style.css' %}">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        {% include "medicos/partials/sidebar.html" %}
+        
+        <!-- Main Content -->
+        <div id="content" class="content flex-grow overflow-y-auto">
+            <!-- Header -->
+            {% include "mdeicos/partials/header_main.html" %}
+            
+            <!-- Dashboard -->
+            <div id="dashboard" class="p-6">
+                {% include "medicos/partials/cards_inform.html" %}
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {% include "medicos/partials/grid_prox_consulta.html" %}
+                    
+                    {% include "medicos/partials/acess_speed.html" %}
+                </div>
+            </div>
+            
+            <!-- Patients Section -->
+            {% include "medicos/partials/patients_sections.html" %}
+            
+            <!-- Patient Modal -->
+            <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                {% include "medicos/partials/pacient_modal.html" %}
+            </div>
+            
+            <!-- Doctors Section -->
+            <div id="doctors" class="p-6 hidden">
+                {% include "medicos/partials/doctor_sections.html" %}
+            </div>
+            
+            <!-- Doctor Modal -->
+            <div id="doctor-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                {% include "medicos/partials/doctor_modal.html" %}
+            </div>
+            
+            <!-- Appointments Section -->
+            <div id="appointments" class="p-6 hidden">
+                {% include "medicos/partials/appoinments_sections.html" %}
+            </div>
+            
+            <!-- Scheduled Appointments Section -->
+            <div id="scheduled" class="p-6 hidden">
+                {% include "medicos/partials/sheduled_appointments.html" %}
+            </div>
+            
+            <!-- Appointment Detail Modal -->
+            <div id="appointment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                {% include "medicos/partials/appoiments_modal.html" %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'static_global/js/medicos/dashboard.js' %}"></script>
+</body>
+</html>

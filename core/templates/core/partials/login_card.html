@@ -1,0 +1,127 @@
+{% load static %}
+
+
+<!-- Login Card -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- Error Message (hidden by default) -->
+    <div id="errorMessage" class="hidden error-message bg-red-50 border-l-4 border-red-500 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+            </div>
+            <div class="ml-3">
+                <p id="errorText" class="text-sm text-red-700"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Message (hidden by default) -->
+    <div id="successMessage" class="hidden error-message bg-green-50 border-l-4 border-green-500 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <div class="ml-3">
+                <p id="successText" class="text-sm text-green-700"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Acesse sua conta</h2>
+        
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="seu@email.com"
+                        required
+                    >
+                </div>
+                <p id="emailError" class="mt-1 text-sm text-red-600 hidden">Por favor, insira um e-mail válido</p>
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="••••••••"
+                        required
+                        minlength="6"
+                    >
+                </div>
+                <p id="passwordError" class="mt-1 text-sm text-red-600 hidden">A senha deve ter pelo menos 6 caracteres</p>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input 
+                        id="remember-me" 
+                        name="remember-me" 
+                        type="checkbox"
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    >
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                        Lembrar de mim
+                    </label>
+                </div>
+                
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500 flex items-center">
+                        <i class="fas fa-lock mr-1 text-sm"></i> Esqueceu sua senha?
+                    </a>
+                </div>
+            </div>
+            
+            <div>
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    <span id="btnText">Entrar</span>
+                    <span id="loadingSpinner" class="hidden ml-2">
+                        <i class="fas fa-circle-notch loading-spinner"></i>
+                    </span>
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">
+                        Novo no MedSchedule?
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a 
+                    href="{% url 'pacientes:criar_conta' %}" 
+                    class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Criar uma conta
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

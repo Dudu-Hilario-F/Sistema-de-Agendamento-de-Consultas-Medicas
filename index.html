@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSchedule - Sistema de Agendamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar-collapsed {
+            width: 70px;
+        }
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s ease;
+        }
+        .content-expanded {
+            margin-left: 70px;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .time-slot {
+            transition: all 0.2s ease;
+        }
+        .time-slot:hover {
+            transform: scale(1.05);
+        }
+        .time-slot.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .time-slot.unavailable {
+            background-color: #f87171;
+            color: white;
+            cursor: not-allowed;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-blue-800 text-white w-64 flex-shrink-0 flex flex-col">
+            <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-blue-800 text-xl"></i>
+                </div>
+                <span class="logo-text text-xl font-bold">MedSchedule</span>
+            </div>
+            
+            <div class="flex-grow p-4 overflow-y-auto">
+                <nav class="space-y-2">
+                    <a href="#dashboard" class="nav-item flex items-center space-x-3 p-3 rounded-lg bg-blue-700">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                    <a href="#patients" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-user-injured"></i>
+                        <span class="sidebar-text">Pacientes</span>
+                    </a>
+                    <a href="#doctors" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-user-md"></i>
+                        <span class="sidebar-text">Médicos</span>
+                    </a>
+                    <a href="#appointments" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-calendar-check"></i>
+                        <span class="sidebar-text">Agendamentos</span>
+                    </a>
+                    <a href="#scheduled" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-list"></i>
+                        <span class="sidebar-text">Consultas</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-blue-700">
+                <button id="toggle-sidebar" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-700 w-full">
+                    <i class="fas fa-chevron-left"></i>
+                    <span class="sidebar-text">Recolher Menu</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div id="content" class="content flex-grow overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user text-blue-800"></i>
+                        </div>
+                        <span class="font-medium">Admin</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard -->
+            <div id="dashboard" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user-injured text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Pacientes</p>
+                            <h3 class="text-2xl font-bold">124</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-user-md text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Médicos</p>
+                            <h3 class="text-2xl font-bold">18</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Consultas Hoje</p>
+                            <h3 class="text-2xl font-bold">23</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Próximas Consultas</h2>
+                            <button class="text-blue-600 hover:text-blue-800">Ver todas</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-blue-50">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="font-medium">Dr. Silva - João Santos</h4>
+                                    <p class="text-sm text-gray-500">15:30 - 16/06/2023</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-blue-50">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="font-medium">Dra. Oliveira - Maria Souza</h4>
+                                    <p class="text-sm text-gray-500">10:00 - 16/06/2023</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-blue-50">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="font-medium">Dr. Costa - Ana Lima</h4>
+                                    <p class="text-sm text-gray-500">14:15 - 16/06/2023</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Acesso Rápido</h2>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="#patients" class="p-4 border rounded-lg flex flex-col items-center justify-center hover:bg-blue-50 hover:border-blue-200">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                    <i class="fas fa-user-plus text-blue-600"></i>
+                                </div>
+                                <span class="text-center">Novo Paciente</span>
+                            </a>
+                            <a href="#doctors" class="p-4 border rounded-lg flex flex-col items-center justify-center hover:bg-blue-50 hover:border-blue-200">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-2">
+                                    <i class="fas fa-user-md text-green-600"></i>
+                                </div>
+                                <span class="text-center">Novo Médico</span>
+                            </a>
+                            <a href="#appointments" class="p-4 border rounded-lg flex flex-col items-center justify-center hover:bg-blue-50 hover:border-blue-200">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-2">
+                                    <i class="fas fa-calendar-plus text-purple-600"></i>
+                                </div>
+                                <span class="text-center">Nova Consulta</span>
+                            </a>
+                            <a href="#scheduled" class="p-4 border rounded-lg flex flex-col items-center justify-center hover:bg-blue-50 hover:border-blue-200">
+                                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+                                    <i class="fas fa-list-alt text-yellow-600"></i>
+                                </div>
+                                <span class="text-center">Ver Consultas</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Patients Section -->
+            <div id="patients" class="p-6 hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Pacientes</h2>
+                        <button id="new-patient-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Novo Paciente</span>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPF</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nascimento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                                                <div class="text-sm text-gray-500">joao.silva@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">123.456.789-00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/03/1985</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 98765-4321</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-patient" data-id="1">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-patient" data-id="1">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Maria Oliveira</div>
+                                                <div class="text-sm text-gray-500">maria.oliveira@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">987.654.321-00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">22/07/1990</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 91234-5678</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-patient" data-id="2">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-patient" data-id="2">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Carlos Souza</div>
+                                                <div class="text-sm text-gray-500">carlos.souza@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">456.789.123-00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/11/1978</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 99876-5432</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-patient" data-id="3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-patient" data-id="3">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Patient Modal -->
+            <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-lg font-semibold" id="patient-modal-title">Novo Paciente</h3>
+                        <button id="close-patient-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <form id="patient-form">
+                            <input type="hidden" id="patient-id">
+                            <div class="mb-4">
+                                <label for="patient-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                                <input type="text" id="patient-name" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="patient-cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                                <input type="text" id="patient-cpf" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="patient-birth" class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                                <input type="date" id="patient-birth" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="patient-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                                <input type="email" id="patient-email" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="patient-phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                <input type="tel" id="patient-phone" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="flex justify-end border-t p-4">
+                        <button id="cancel-patient" class="px-4 py-2 text-gray-600 hover:text-gray-800 mr-2">Cancelar</button>
+                        <button id="save-patient" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Doctors Section -->
+            <div id="doctors" class="p-6 hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Médicos</h2>
+                        <button id="new-doctor-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Novo Médico</span>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CRM</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidade</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                                <i class="fas fa-user-md text-green-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Dr. Roberto Silva</div>
+                                                <div class="text-sm text-gray-500">roberto.silva@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">CRM/SP 123456</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cardiologia</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 98765-4321</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-doctor" data-id="1">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-doctor" data-id="1">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                                <i class="fas fa-user-md text-green-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Dra. Ana Oliveira</div>
+                                                <div class="text-sm text-gray-500">ana.oliveira@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">CRM/SP 654321</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Pediatria</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 91234-5678</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-doctor" data-id="2">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-doctor" data-id="2">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                                <i class="fas fa-user-md text-green-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Dr. Carlos Costa</div>
+                                                <div class="text-sm text-gray-500">carlos.costa@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">CRM/SP 789123</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ortopedia</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(11) 99876-5432</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 edit-doctor" data-id="3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 delete-doctor" data-id="3">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Doctor Modal -->
+            <div id="doctor-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-lg font-semibold" id="doctor-modal-title">Novo Médico</h3>
+                        <button id="close-doctor-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <form id="doctor-form">
+                            <input type="hidden" id="doctor-id">
+                            <div class="mb-4">
+                                <label for="doctor-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                                <input type="text" id="doctor-name" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="doctor-crm" class="block text-sm font-medium text-gray-700 mb-1">CRM</label>
+                                <input type="text" id="doctor-crm" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="doctor-specialty" class="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                                <input type="text" id="doctor-specialty" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="doctor-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                                <input type="email" id="doctor-email" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="doctor-phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                <input type="tel" id="doctor-phone" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Horários Disponíveis</label>
+                                <div id="availability-container">
+                                    <!-- Existing availability slots will be added here -->
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <select id="day-select" class="form-input px-4 py-2 border rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="Segunda-feira">Segunda-feira</option>
+                                        <option value="Terça-feira">Terça-feira</option>
+                                        <option value="Quarta-feira">Quarta-feira</option>
+                                        <option value="Quinta-feira">Quinta-feira</option>
+                                        <option value="Sexta-feira">Sexta-feira</option>
+                                        <option value="Sábado">Sábado</option>
+                                        <option value="Domingo">Domingo</option>
+                                    </select>
+                                    <input type="time" id="start-time" class="form-input px-4 py-2 border rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <span>às</span>
+                                    <input type="time" id="end-time" class="form-input px-4 py-2 border rounded-lg ml-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button id="add-availability" type="button" class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="flex justify-end border-t p-4">
+                        <button id="cancel-doctor" class="px-4 py-2 text-gray-600 hover:text-gray-800 mr-2">Cancelar</button>
+                        <button id="save-doctor" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Appointments Section -->
+            <div id="appointments" class="p-6 hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Agendar Consulta</h2>
+                    </div>
+                    
+                    <form id="appointment-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="appointment-patient" class="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                                <select id="appointment-patient" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Selecione um paciente</option>
+                                    <option value="1">João da Silva</option>
+                                    <option value="2">Maria Oliveira</option>
+                                    <option value="3">Carlos Souza</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="appointment-doctor" class="block text-sm font-medium text-gray-700 mb-1">Médico</label>
+                                <select id="appointment-doctor" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Selecione um médico</option>
+                                    <option value="1">Dr. Roberto Silva (Cardiologia)</option>
+                                    <option value="2">Dra. Ana Oliveira (Pediatria)</option>
+                                    <option value="3">Dr. Carlos Costa (Ortopedia)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="appointment-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                                <input type="date" id="appointment-date" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Horário Disponível</label>
+                                <div id="time-slots" class="grid grid-cols-3 gap-2">
+                                    <!-- Time slots will be populated here by JavaScript -->
+                                </div>
+                                <p id="time-error" class="text-red-500 text-sm mt-1 hidden">Por favor, selecione um horário disponível</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <button type="button" id="schedule-appointment" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Agendar Consulta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Scheduled Appointments Section -->
+            <div id="scheduled" class="p-6 hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Consultas Agendadas</h2>
+                        <div class="flex space-x-2">
+                            <button id="filter-appointments" class="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center">
+                                <i class="fas fa-filter mr-2"></i>
+                                <span>Filtrar</span>
+                            </button>
+                            <button id="export-appointments" class="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center">
+                                <i class="fas fa-file-export mr-2"></i>
+                                <span>Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4" id="filter-container" style="display: none;">
+                        <div>
+                            <label for="filter-doctor" class="block text-sm font-medium text-gray-700 mb-1">Médico</label>
+                            <select id="filter-doctor" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Todos</option>
+                                <option value="1">Dr. Roberto Silva</option>
+                                <option value="2">Dra. Ana Oliveira</option>
+                                <option value="3">Dr. Carlos Costa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filter-patient" class="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                            <select id="filter-patient" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Todos</option>
+                                <option value="1">João da Silva</option>
+                                <option value="2">Maria Oliveira</option>
+                                <option value="3">Carlos Souza</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filter-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                            <input type="date" id="filter-date" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="filter-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="filter-status" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Todos</option>
+                                <option value="scheduled">Agendada</option>
+                                <option value="completed">Realizada</option>
+                                <option value="canceled">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médico</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">16/06/2023</div>
+                                        <div class="text-sm text-gray-500">15:30</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                                        <div class="text-sm text-gray-500">123.456.789-00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Dr. Roberto Silva</div>
+                                        <div class="text-sm text-gray-500">Cardiologia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="1">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 cancel-appointment" data-id="1">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">16/06/2023</div>
+                                        <div class="text-sm text-gray-500">10:00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Maria Oliveira</div>
+                                        <div class="text-sm text-gray-500">987.654.321-00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Dra. Ana Oliveira</div>
+                                        <div class="text-sm text-gray-500">Pediatria</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="2">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900 cancel-appointment" data-id="2">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">15/06/2023</div>
+                                        <div class="text-sm text-gray-500">14:15</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Carlos Souza</div>
+                                        <div class="text-sm text-gray-500">456.789.123-00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Dr. Carlos Costa</div>
+                                        <div class="text-sm text-gray-500">Ortopedia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Realizada</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="3">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900" disabled>
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">14/06/2023</div>
+                                        <div class="text-sm text-gray-500">09:00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                                        <div class="text-sm text-gray-500">123.456.789-00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Dra. Ana Oliveira</div>
+                                        <div class="text-sm text-gray-500">Pediatria</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelada</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="4">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900 mr-3" disabled>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900" disabled>
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Appointment Detail Modal -->
+            <div id="appointment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-lg font-semibold">Detalhes da Consulta</h3>
+                        <button id="close-appointment-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Paciente</h4>
+                                <p id="appointment-detail-patient" class="text-lg font-medium">João da Silva</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Médico</h4>
+                                <p id="appointment-detail-doctor" class="text-lg font-medium">Dr. Roberto Silva (Cardiologia)</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500">Data</h4>
+                                    <p id="appointment-detail-date" class="text-lg font-medium">16/06/2023</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500">Hora</h4>
+                                    <p id="appointment-detail-time" class="text-lg font-medium">15:30</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Status</h4>
+                                <p id="appointment-detail-status" class="text-lg font-medium">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end border-t p-4">
+                        <button id="close-appointment-detail" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            
+            sidebar.classList.toggle('sidebar-collapsed');
+            content.classList.toggle('content-expanded');
+            
+            if (sidebar.classList.contains('sidebar-collapsed')) {
+                this.innerHTML = '<i class="fas fa-chevron-right"></i><span class="sidebar-text">Expandir Menu</span>';
+            } else {
+                this.innerHTML = '<i class="fas fa-chevron-left"></i><span class="sidebar-text">Recolher Menu</span>';
+            }
+        });
+        
+        // Navigation between sections
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Hide all sections
+                document.querySelectorAll('#content > div').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show the selected section
+                const target = this.getAttribute('href');
+                document.querySelector(target).classList.remove('hidden');
+                
+                // Update header title
+                const headerTitle = document.querySelector('header h1');
+                if (target === '#dashboard') {
+                    headerTitle.textContent = 'Dashboard';
+                } else if (target === '#patients') {
+                    headerTitle.textContent = 'Pacientes';
+                } else if (target === '#doctors') {
+                    headerTitle.textContent = 'Médicos';
+                } else if (target === '#appointments') {
+                    headerTitle.textContent = 'Agendar Consulta';
+                } else if (target === '#scheduled') {
+                    headerTitle.textContent = 'Consultas Agendadas';
+                }
+                
+                // Update active nav item
+                document.querySelectorAll('nav a').forEach(navLink => {
+                    navLink.classList.remove('bg-blue-700');
+                    navLink.classList.add('hover:bg-blue-700');
+                });
+                
+                this.classList.remove('hover:bg-blue-700');
+                this.classList.add('bg-blue-700');
+            });
+        });
+        
+        // Patient Modal
+        const patientModal = document.getElementById('patient-modal');
+        const newPatientBtn = document.getElementById('new-patient-btn');
+        const closePatientModal = document.getElementById('close-patient-modal');
+        const cancelPatient = document.getElementById('cancel-patient');
+        const savePatient = document.getElementById('save-patient');
+        
+        newPatientBtn.addEventListener('click', function() {
+            document.getElementById('patient-modal-title').textContent = 'Novo Paciente';
+            document.getElementById('patient-form').reset();
+            document.getElementById('patient-id').value = '';
+            patientModal.classList.remove('hidden');
+        });
+        
+        closePatientModal.addEventListener('click', function() {
+            patientModal.classList.add('hidden');
+        });
+        
+        cancelPatient.addEventListener('click', function() {
+            patientModal.classList.add('hidden');
+        });
+        
+        // Edit patient buttons
+        document.querySelectorAll('.edit-patient').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const patientId = this.getAttribute('data-id');
+                // In a real app, you would fetch patient data based on ID
+                
+                document.getElementById('patient-modal-title').textContent = 'Editar Paciente';
+                document.getElementById('patient-id').value = patientId;
+                
+                // Sample data - in a real app, this would come from an API
+                if (patientId === '1') {
+                    document.getElementById('patient-name').value = 'João da Silva';
+                    document.getElementById('patient-cpf').value = '123.456.789-00';
+                    document.getElementById('patient-birth').value = '1985-03-15';
+                    document.getElementById('patient-email').value = 'joao.silva@email.com';
+                    document.getElementById('patient-phone').value = '(11) 98765-4321';
+                } else if (patientId === '2') {
+                    document.getElementById('patient-name').value = 'Maria Oliveira';
+                    document.getElementById('patient-cpf').value = '987.654.321-00';
+                    document.getElementById('patient-birth').value = '1990-07-22';
+                    document.getElementById('patient-email').value = 'maria.oliveira@email.com';
+                    document.getElementById('patient-phone').value = '(11) 91234-5678';
+                } else if (patientId === '3') {
+                    document.getElementById('patient-name').value = 'Carlos Souza';
+                    document.getElementById('patient-cpf').value = '456.789.123-00';
+                    document.getElementById('patient-birth').value = '1978-11-10';
+                    document.getElementById('patient-email').value = 'carlos.souza@email.com';
+                    document.getElementById('patient-phone').value = '(11) 99876-5432';
+                }
+                
+                patientModal.classList.remove('hidden');
+            });
+        });
+        
+        // Save patient
+        savePatient.addEventListener('click', function() {
+            // In a real app, you would save the patient data to an API
+            alert('Paciente salvo com sucesso!');
+            patientModal.classList.add('hidden');
+        });
+        
+        // Delete patient buttons
+        document.querySelectorAll('.delete-patient').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const patientId = this.getAttribute('data-id');
+                if (confirm('Tem certeza que deseja excluir este paciente?')) {
+                    // In a real app, you would delete the patient from an API
+                    alert('Paciente excluído com sucesso!');
+                }
+            });
+        });
+        
+        // Doctor Modal
+        const doctorModal = document.getElementById('doctor-modal');
+        const newDoctorBtn = document.getElementById('new-doctor-btn');
+        const closeDoctorModal = document.getElementById('close-doctor-modal');
+        const cancelDoctor = document.getElementById('cancel-doctor');
+        const saveDoctor = document.getElementById('save-doctor');
+        const addAvailability = document.getElementById('add-availability');
+        const availabilityContainer = document.getElementById('availability-container');
+        
+        newDoctorBtn.addEventListener('click', function() {
+            document.getElementById('doctor-modal-title').textContent = 'Novo Médico';
+            document.getElementById('doctor-form').reset();
+            document.getElementById('doctor-id').value = '';
+            availabilityContainer.innerHTML = '';
+            doctorModal.classList.remove('hidden');
+        });
+        
+        closeDoctorModal.addEventListener('click', function() {
+            doctorModal.classList.add('hidden');
+        });
+        
+        cancelDoctor.addEventListener('click', function() {
+            doctorModal.classList.add('hidden');
+        });
+        
+        // Edit doctor buttons
+        document.querySelectorAll('.edit-doctor').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const doctorId = this.getAttribute('data-id');
+                // In a real app, you would fetch doctor data based on ID
+                
+                document.getElementById('doctor-modal-title').textContent = 'Editar Médico';
+                document.getElementById('doctor-id').value = doctorId;
+                availabilityContainer.innerHTML = '';
+                
+                // Sample data - in a real app, this would come from an API
+                if (doctorId === '1') {
+                    document.getElementById('doctor-name').value = 'Dr. Roberto Silva';
+                    document.getElementById('doctor-crm').value = 'CRM/SP 123456';
+                    document.getElementById('doctor-specialty').value = 'Cardiologia';
+                    document.getElementById('doctor-email').value = 'roberto.silva@email.com';
+                    document.getElementById('doctor-phone').value = '(11) 98765-4321';
+                    
+                    // Add sample availability
+                    addAvailabilitySlot('Segunda-feira', '14:00', '18:00');
+                    addAvailabilitySlot('Quarta-feira', '09:00', '12:00');
+                    addAvailabilitySlot('Sexta-feira', '08:00', '17:00');
+                } else if (doctorId === '2') {
+                    document.getElementById('doctor-name').value = 'Dra. Ana Oliveira';
+                    document.getElementById('doctor-crm').value = 'CRM/SP 654321';
+                    document.getElementById('doctor-specialty').value = 'Pediatria';
+                    document.getElementById('doctor-email').value = 'ana.oliveira@email.com';
+                    document.getElementById('doctor-phone').value = '(11) 91234-5678';
+                    
+                    // Add sample availability
+                    addAvailabilitySlot('Terça-feira', '08:00', '12:00');
+                    addAvailabilitySlot('Quinta-feira', '13:00', '18:00');
+                } else if (doctorId === '3') {
+                    document.getElementById('doctor-name').value = 'Dr. Carlos Costa';
+                    document.getElementById('doctor-crm').value = 'CRM/SP 789123';
+                    document.getElementById('doctor-specialty').value = 'Ortopedia';
+                    document.getElementById('doctor-email').value = 'carlos.costa@email.com';
+                    document.getElementById('doctor-phone').value = '(11) 99876-5432';
+                    
+                    // Add sample availability
+                    addAvailabilitySlot('Segunda-feira', '09:00', '18:00');
+                    addAvailabilitySlot('Quarta-feira', '09:00', '18:00');
+                    addAvailabilitySlot('Sexta-feira', '09:00', '18:00');
+                }
+                
+                doctorModal.classList.remove('hidden');
+            });
+        });
+        
+        // Function to add availability slot to the container
+        function addAvailabilitySlot(day, startTime, endTime) {
+            const slotId = Date.now(); // Simple unique ID
+            const slot = document.createElement('div');
+            slot.className = 'flex items-center justify-between bg-gray-100 p-2 rounded mb-2';
+            slot.innerHTML = `
+                <span>${day}, ${startTime} às ${endTime}</span>
+                <button class="text-red-500 remove-slot" data-id="${slotId}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            availabilityContainer.appendChild(slot);
+            
+            // Add event listener to remove button
+            slot.querySelector('.remove-slot').addEventListener('click', function() {
+                slot.remove();
+            });
+        }
+        
+        // Add availability
+        addAvailability.addEventListener('click', function() {
+            const day = document.getElementById('day-select').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            
+            if (!startTime || !endTime) {
+                alert('Por favor, selecione os horários de início e término');
+                return;
+            }
+            
+            addAvailabilitySlot(day, startTime, endTime);
+            
+            // Clear time inputs
+            document.getElementById('start-time').value = '';
+            document.getElementById('end-time').value = '';
+        });
+        
+        // Save doctor
+        saveDoctor.addEventListener('click', function() {
+            // In a real app, you would save the doctor data to an API
+            alert('Médico salvo com sucesso!');
+            doctorModal.classList.add('hidden');
+        });
+        
+        // Delete doctor buttons
+        document.querySelectorAll('.delete-doctor').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const doctorId = this.getAttribute('data-id');
+                if (confirm('Tem certeza que deseja excluir este médico?')) {
+                    // In a real app, you would delete the doctor from an API
+                    alert('Médico excluído com sucesso!');
+                }
+            });
+        });
+        
+        // Appointment scheduling
+        const scheduleAppointment = document.getElementById('schedule-appointment');
+        const timeSlotsContainer = document.getElementById('time-slots');
+        const timeError = document.getElementById('time-error');
+        
+        // When doctor is selected, populate available time slots
+        document.getElementById('appointment-doctor').addEventListener('change', function() {
+            const doctorId = this.value;
+            timeSlotsContainer.innerHTML = '';
+            
+            if (!doctorId) return;
+            
+            // In a real app, you would fetch available time slots based on doctor and date
+            // For demo purposes, we'll generate some sample time slots
+            
+            // Sample time slots
+            const slots = [];
+            if (doctorId === '1') {
+                slots.push('09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00');
+            } else if (doctorId === '2') {
+                slots.push('08:00', '09:30', '11:00', '13:00', '14:30', '16:00', '17:30');
+            } else if (doctorId === '3') {
+                slots.push('09:00', '10:30', '12:00', '14:00', '15:30', '17:00');
+            }
+            
+            // Mark some slots as unavailable for demo
+            const unavailableSlots = ['11:00', '15:00'];
+            
+            slots.forEach(slot => {
+                const isUnavailable = unavailableSlots.includes(slot);
+                const slotBtn = document.createElement('button');
+                slotBtn.className = `time-slot px-3 py-2 border rounded ${isUnavailable ? 'unavailable' : 'hover:bg-blue-100'}`;
+                slotBtn.textContent = slot;
+                slotBtn.disabled = isUnavailable;
+                
+                if (!isUnavailable) {
+                    slotBtn.addEventListener('click', function() {
+                        // Deselect all slots
+                        document.querySelectorAll('.time-slot').forEach(s => {
+                            s.classList.remove('selected');
+                        });
+                        
+                        // Select this slot
+                        this.classList.add('selected');
+                        timeError.classList.add('hidden');
+                    });
+                }
+                
+                timeSlotsContainer.appendChild(slotBtn);
+            });
+        });
+        
+        // Schedule appointment
+        scheduleAppointment.addEventListener('click', function() {
+            const patientId = document.getElementById('appointment-patient').value;
+            const doctorId = document.getElementById('appointment-doctor').value;
+            const date = document.getElementById('appointment-date').value;
+            const selectedTimeSlot = document.querySelector('.time-slot.selected');
+            
+            // Simple validation
+            if (!patientId) {
+                alert('Por favor, selecione um paciente');
+                return;
+            }
+            
+            if (!doctorId) {
+                alert('Por favor, selecione um médico');
+                return;
+            }
+            
+            if (!date) {
+                alert('Por favor, selecione uma data');
+                return;
+            }
+            
+            if (!selectedTimeSlot) {
+                timeError.classList.remove('hidden');
+                return;
+            }
+            
+            const time = selectedTimeSlot.textContent;
+            
+            // In a real app, you would save the appointment to an API
+            alert(`Consulta agendada para ${date} às ${time}`);
+            
+            // Reset form
+            document.getElementById('appointment-form').reset();
+            timeSlotsContainer.innerHTML = '';
+            timeError.classList.add('hidden');
+        });
+        
+        // Scheduled appointments section
+        const filterAppointments = document.getElementById('filter-appointments');
+        const filterContainer = document.getElementById('filter-container');
+        
+        filterAppointments.addEventListener('click', function() {
+            filterContainer.style.display = filterContainer.style.display === 'none' ? 'grid' : 'none';
+        });
+        
+        // View appointment details
+        const appointmentModal = document.getElementById('appointment-modal');
+        const closeAppointmentModal = document.getElementById('close-appointment-modal');
+        const closeAppointmentDetail = document.getElementById('close-appointment-detail');
+        
+        document.querySelectorAll('.view-appointment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const appointmentId = this.getAttribute('data-id');
+                
+                // In a real app, you would fetch appointment details based on ID
+                // For demo, we'll use sample data
+                if (appointmentId === '1') {
+                    document.getElementById('appointment-detail-patient').textContent = 'João da Silva';
+                    document.getElementById('appointment-detail-doctor').textContent = 'Dr. Roberto Silva (Cardiologia)';
+                    document.getElementById('appointment-detail-date').textContent = '16/06/2023';
+                    document.getElementById('appointment-detail-time').textContent = '15:30';
+                    document.getElementById('appointment-detail-status').innerHTML = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>';
+                } else if (appointmentId === '2') {
+                    document.getElementById('appointment-detail-patient').textContent = 'Maria Oliveira';
+                    document.getElementById('appointment-detail-doctor').textContent = 'Dra. Ana Oliveira (Pediatria)';
+                    document.getElementById('appointment-detail-date').textContent = '16/06/2023';
+                    document.getElementById('appointment-detail-time').textContent = '10:00';
+                    document.getElementById('appointment-detail-status').innerHTML = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>';
+                } else if (appointmentId === '3') {
+                    document.getElementById('appointment-detail-patient').textContent = 'Carlos Souza';
+                    document.getElementById('appointment-detail-doctor').textContent = 'Dr. Carlos Costa (Ortopedia)';
+                    document.getElementById('appointment-detail-date').textContent = '15/06/2023';
+                    document.getElementById('appointment-detail-time').textContent = '14:15';
+                    document.getElementById('appointment-detail-status').innerHTML = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Realizada</span>';
+                } else if (appointmentId === '4') {
+                    document.getElementById('appointment-detail-patient').textContent = 'João da Silva';
+                    document.getElementById('appointment-detail-doctor').textContent = 'Dra. Ana Oliveira (Pediatria)';
+                    document.getElementById('appointment-detail-date').textContent = '14/06/2023';
+                    document.getElementById('appointment-detail-time').textContent = '09:00';
+                    document.getElementById('appointment-detail-status').innerHTML = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelada</span>';
+                }
+                
+                appointmentModal.classList.remove('hidden');
+            });
+        });
+        
+        closeAppointmentModal.addEventListener('click', function() {
+            appointmentModal.classList.add('hidden');
+        });
+        
+        closeAppointmentDetail.addEventListener('click', function() {
+            appointmentModal.classList.add('hidden');
+        });
+        
+        // Cancel appointment
+        document.querySelectorAll('.cancel-appointment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const appointmentId = this.getAttribute('data-id');
+                if (confirm('Tem certeza que deseja cancelar esta consulta?')) {
+                    // In a real app, you would update the appointment status via API
+                    alert('Consulta cancelada com sucesso!');
+                }
+            });
+        });
+        
+        // Export appointments
+        document.getElementById('export-appointments').addEventListener('click', function() {
+            alert('Exportando consultas...');
+            // In a real app, this would generate a CSV or PDF file
+        });
+    </script>
+</body>
+</html>

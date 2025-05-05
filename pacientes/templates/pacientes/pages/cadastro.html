@@ -1,0 +1,92 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Paciente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="{% static 'static_global/css/cadastro_paciente/paciente_style.css' %}">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        {% include "pacientes/partials/header.html" %}
+        
+        <!-- Registration Card -->
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            
+            <!-- Card Header -->
+            {% include "pacientes/partials/card_header.html" %}
+            
+            <!-- Success Message (Hidden by default) -->
+            {% include "pacientes/partials/successMenssage.html" %}
+            
+            <!-- Registration Form -->
+            <form id="registrationForm" class="px-6 py-4">
+                
+                <!-- Full Name -->
+                {% include "pacientes/partials/full_name.html" %}
+                
+                <!-- Birth Date -->
+                {% include "pacientes/partials/birth_date.html" %}
+                
+                <!-- CPF -->
+                {% include "pacientes/partials/cpf.html" %}
+                
+                <!-- Email -->
+                {% include "pacientes/partials/email.html" %}
+                
+                <!-- Phone -->
+                {% include "pacientes/partials/phone.html" %}
+                
+                <!-- Health Plan -->
+                <div class="mb-4">
+                    {% include "pacientes/partials/plan.html" %}
+                </div>
+                
+                <!-- Address -->
+                {% include "pacientes/partials/address.html" %}
+                
+                <!-- Password -->
+                {% include "pacientes/partials/password.html" %}
+                
+                <!-- Confirm Password -->
+                {% include "pacientes/partials/confirm_pass.html" %}
+                
+                <!-- Submit Button -->
+                <div class="mb-4">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.01] active:scale-[0.99]">
+                        Cadastrar
+                    </button>
+                </div>
+                
+                <!-- Login Link -->
+                <div class="text-center text-gray-600">
+                    Já possui uma conta? <a href="#" class="text-blue-700 hover:underline">Faça login</a>
+                </div>
+            </form>
+            
+            <!-- Footer Note -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">
+                    Ao se cadastrar, você concorda com nossa <a href="#" class="text-blue-700 hover:underline">Política de Privacidade</a> e <a href="#" class="text-blue-700 hover:underline">Termos de Uso</a>. Seus dados serão utilizados exclusivamente para fins médicos e não serão compartilhados com terceiros sem sua autorização.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css">
+
+    <!-- Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/i18n/datepicker.pt-BR.min.js"></script>
+    <script src="{% static 'static_global/js/cadastroPaci/cad_paciente.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,177 @@
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Consultas Agendadas</h2>
+        <div class="flex space-x-2">
+            <button id="filter-appointments" class="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center">
+                <i class="fas fa-filter mr-2"></i>
+                <span>Filtrar</span>
+            </button>
+            <button id="export-appointments" class="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center">
+                <i class="fas fa-file-export mr-2"></i>
+                <span>Exportar</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4" id="filter-container" style="display: none;">
+        <div>
+            <label for="filter-doctor" class="block text-sm font-medium text-gray-700 mb-1">Médico</label>
+            <select id="filter-doctor" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Todos</option>
+                <option value="1">Dr. Roberto Silva</option>
+                <option value="2">Dra. Ana Oliveira</option>
+                <option value="3">Dr. Carlos Costa</option>
+            </select>
+        </div>
+        <div>
+            <label for="filter-patient" class="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+            <select id="filter-patient" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Todos</option>
+                <option value="1">João da Silva</option>
+                <option value="2">Maria Oliveira</option>
+                <option value="3">Carlos Souza</option>
+            </select>
+        </div>
+        <div>
+            <label for="filter-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+            <input type="date" id="filter-date" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="filter-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select id="filter-status" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Todos</option>
+                <option value="scheduled">Agendada</option>
+                <option value="completed">Realizada</option>
+                <option value="canceled">Cancelada</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médico</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">16/06/2023</div>
+                        <div class="text-sm text-gray-500">15:30</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                        <div class="text-sm text-gray-500">123.456.789-00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Dr. Roberto Silva</div>
+                        <div class="text-sm text-gray-500">Cardiologia</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 cancel-appointment" data-id="1">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">16/06/2023</div>
+                        <div class="text-sm text-gray-500">10:00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Maria Oliveira</div>
+                        <div class="text-sm text-gray-500">987.654.321-00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Dra. Ana Oliveira</div>
+                        <div class="text-sm text-gray-500">Pediatria</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 cancel-appointment" data-id="2">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">15/06/2023</div>
+                        <div class="text-sm text-gray-500">14:15</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Carlos Souza</div>
+                        <div class="text-sm text-gray-500">456.789.123-00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Dr. Carlos Costa</div>
+                        <div class="text-sm text-gray-500">Ortopedia</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Realizada</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="3">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-yellow-600 hover:text-yellow-900 mr-3 edit-appointment" data-id="3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-gray-900" disabled>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">14/06/2023</div>
+                        <div class="text-sm text-gray-500">09:00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                        <div class="text-sm text-gray-500">123.456.789-00</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">Dra. Ana Oliveira</div>
+                        <div class="text-sm text-gray-500">Pediatria</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelada</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-900 mr-3 view-appointment" data-id="4">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-gray-900 mr-3" disabled>
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-gray-900" disabled>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

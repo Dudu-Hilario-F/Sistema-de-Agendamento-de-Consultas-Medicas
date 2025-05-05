@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSchedule - Agendamento de Consultas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .notification-container {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        
+        .notification-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .notification-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .notification-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .notification-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .modal.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+        
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Header/Navbar -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-heartbeat text-blue-600 text-2xl mr-2"></i>
+                <h1 class="text-xl font-bold text-blue-800">MedSchedule</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button id="notificationBtn" class="text-gray-600 hover:text-blue-600 relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-10 notification-container">
+                        <div class="p-4 border-b">
+                            <h3 class="font-semibold text-gray-700">Notificações</h3>
+                        </div>
+                        <div class="divide-y">
+                            <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                                <p class="text-sm text-gray-700">Sua consulta com Dr. Silva foi confirmada para amanhã às 14:30</p>
+                                <p class="text-xs text-gray-500 mt-1">10 minutos atrás</p>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                                <p class="text-sm text-gray-700">Dr. Oliveira enviou uma mensagem sobre sua última consulta</p>
+                                <p class="text-xs text-gray-500 mt-1">2 horas atrás</p>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                                <p class="text-sm text-gray-700">Lembrete: sua consulta com Dra. Costa está marcada para sexta-feira</p>
+                                <p class="text-xs text-gray-500 mt-1">Ontem</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <button id="profileBtn" class="flex items-center space-x-2 text-gray-700 hover:text-blue-600">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <span class="hidden md:inline">João Silva</span>
+                    </button>
+                    
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                        <div class="py-1">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="openModal('profileModal')">Meu Perfil</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="openModal('passwordModal')">Alterar Senha</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Sidebar -->
+            <div class="w-full lg:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                    <button id="newAppointmentBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center justify-center" onclick="openModal('appointmentModal')">
+                        <i class="fas fa-plus mr-2"></i> Nova Consulta
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Menu</h2>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded-md" onclick="showSection('dashboard')">
+                                <i class="fas fa-home mr-3 text-blue-600"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded-md" onclick="showSection('appointments')">
+                                <i class="fas fa-calendar-alt mr-3 text-blue-600"></i>
+                                <span>Minhas Consultas</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded-md" onclick="showSection('history')">
+                                <i class="fas fa-history mr-3 text-blue-600"></i>
+                                <span>Histórico</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded-md" onclick="showSection('messages')">
+                                <i class="fas fa-comments mr-3 text-blue-600"></i>
+                                <span>Mensagens</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="w-full lg:w-3/4">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section-content bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Bem-vindo, João!</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-blue-100 rounded-full mr-4">
+                                    <i class="fas fa-calendar-check text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Próxima consulta</p>
+                                    <p class="font-semibold">15/06/2023 - 14:30</p>
+                                    <p class="text-sm">Dr. Carlos Silva - Cardiologia</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-green-100 rounded-full mr-4">
+                                    <i class="fas fa-user-md text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Consultas este mês</p>
+                                    <p class="font-semibold">2 consultas</p>
+                                    <p class="text-sm">1 confirmada, 1 realizada</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Lembretes</h3>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-circle text-yellow-500"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        Não se esqueça de confirmar sua presença para a consulta de amanhã.
+                                        <a href="#" class="font-medium underline text-yellow-700 hover:text-yellow-600">Confirmar agora</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Mensagens recentes</h3>
+                        <div class="bg-white border rounded-lg divide-y">
+                            <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">Dr. Carlos Silva</p>
+                                        <p class="text-sm text-gray-500 truncate">Sobre sua última consulta...</p>
+                                    </div>
+                                    <div class="text-xs text-gray-500">2 dias atrás</div>
+                                </div>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">Dra. Ana Oliveira</p>
+                                        <p class="text-sm text-gray-500 truncate">Resultados dos exames...</p>
+                                    </div>
+                                    <div class="text-xs text-gray-500">1 semana atrás</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Appointments Section -->
+                <div id="appointments" class="section-content hidden bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Minhas Consultas</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médico</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidade</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">15/06/2023 - 14:30</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Carlos Silva</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Cardiologia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Agendada
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="confirmPresence()">Confirmar Presença</button>
+                                        <button class="text-red-600 hover:text-red-900" onclick="cancelAppointment()">Cancelar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">22/06/2023 - 09:00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dra. Ana Oliveira</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dermatologia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Confirmada
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-red-600 hover:text-red-900" onclick="cancelAppointment()">Cancelar</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">30/06/2023 - 16:15</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Marcos Souza</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Ortopedia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Pendente
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="confirmPresence()">Confirmar Presença</button>
+                                        <button class="text-red-600 hover:text-red-900" onclick="cancelAppointment()">Cancelar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- History Section -->
+                <div id="history" class="section-content hidden bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Histórico de Consultas</h2>
+                    
+                    <div class="mb-4 flex justify-between items-center">
+                        <div class="relative w-64">
+                            <input type="text" placeholder="Buscar consulta..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <div>
+                            <select class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Todos os status</option>
+                                <option>Realizadas</option>
+                                <option>Canceladas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médico</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidade</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">10/05/2023 - 11:00</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Carlos Silva</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Cardiologia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Realizada
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="downloadReceipt()">
+                                            <i class="fas fa-file-pdf mr-1"></i> Recibo
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900" onclick="openChat('Dr. Carlos Silva')">
+                                            <i class="fas fa-comment mr-1"></i> Mensagem
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">25/04/2023 - 15:30</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dra. Ana Oliveira</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dermatologia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Realizada
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="downloadReceipt()">
+                                            <i class="fas fa-file-pdf mr-1"></i> Recibo
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900" onclick="openChat('Dra. Ana Oliveira')">
+                                            <i class="fas fa-comment mr-1"></i> Mensagem
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">12/04/2023 - 10:15</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Dr. Marcos Souza</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Ortopedia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            Cancelada
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-gray-400 cursor-not-allowed" disabled>
+                                            <i class="fas fa-file-pdf mr-1"></i> Recibo
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            Mostrando 1 a 3 de 10 consultas
+                        </div>
+                        <div class="flex space-x-1">
+                            <button class="px-3 py-1 border rounded-md bg-white text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="px-3 py-1 border rounded-md bg-blue-500 text-white">1</button>
+                            <button class="px-3 py-1 border rounded-md bg-white text-gray-700 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border rounded-md bg-white text-gray-700 hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border rounded-md bg-white text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messages Section -->
+                <div id="messages" class="section-content hidden bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Mensagens</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <!-- Contacts List -->
+                        <div class="lg:col-span-1 bg-gray-50 rounded-lg p-4">
+                            <div class="mb-4">
+                                <input type="text" placeholder="Buscar médico..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div class="p-3 bg-white rounded-lg shadow-sm cursor-pointer" onclick="openChat('Dr. Carlos Silva')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-md text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Dr. Carlos Silva</p>
+                                            <p class="text-sm text-gray-500 truncate">Cardiologista</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg shadow-sm cursor-pointer" onclick="openChat('Dra. Ana Oliveira')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-md text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Dra. Ana Oliveira</p>
+                                            <p class="text-sm text-gray-500 truncate">Dermatologista</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg shadow-sm cursor-pointer" onclick="openChat('Dr. Marcos Souza')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-md text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Dr. Marcos Souza</p>
+                                            <p class="text-sm text-gray-500 truncate">Ortopedista</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Area -->
+                        <div class="lg:col-span-2">
+                            <div id="chatPlaceholder" class="flex flex-col items-center justify-center h-full bg-gray-50 rounded-lg p-8 text-center">
+                                <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                                <h3 class="text-xl font-medium text-gray-500 mb-2">Selecione um médico</h3>
+                                <p class="text-gray-400">Escolha um médico na lista ao lado para começar uma conversa</p>
+                            </div>
+                            
+                            <div id="chatWindow" class="hidden flex flex-col h-full bg-white rounded-lg border">
+                                <div class="border-b p-4 flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium" id="chatDoctorName">Dr. Carlos Silva</p>
+                                        <p class="text-sm text-gray-500">Cardiologista</p>
+                                    </div>
+                                </div>
+                                
+                                <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-messages">
+                                    <!-- Messages will be loaded here -->
+                                </div>
+                                
+                                <div class="border-t p-4">
+                                    <div class="flex">
+                                        <input type="text" id="messageInput" placeholder="Digite sua mensagem..." class="flex-1 px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <button class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700" onclick="sendMessage()">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    
+    <!-- New Appointment Modal -->
+    <div id="appointmentModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="border-b p-4 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Agendar Nova Consulta</h3>
+                <button onclick="closeModal('appointmentModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Selecione uma especialidade</option>
+                                <option value="1">Cardiologia</option>
+                                <option value="2">Dermatologia</option>
+                                <option value="3">Ortopedia</option>
+                                <option value="4">Pediatria</option>
+                                <option value="5">Ginecologia</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Médico</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Selecione um médico</option>
+                                <option value="1">Dr. Carlos Silva</option>
+                                <option value="2">Dra. Ana Oliveira</option>
+                                <option value="3">Dr. Marcos Souza</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                            <input type="date" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Horário</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Selecione um horário</option>
+                                <option value="1">08:00</option>
+                                <option value="2">09:30</option>
+                                <option value="3">11:00</option>
+                                <option value="4">14:00</option>
+                                <option value="5">15:30</option>
+                                <option value="6">17:00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Motivo da consulta</label>
+                            <textarea rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('appointmentModal')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button type="button" onclick="submitAppointment()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Agendar Consulta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="border-b p-4 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Meu Perfil</h3>
+                <button onclick="closeModal('profileModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                            <input type="text" value="João Silva" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                            <input type="text" value="123.456.789-00" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data de nascimento</label>
+                            <input type="date" value="1985-05-15" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                            <input type="tel" value="(11) 98765-4321" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                            <input type="email" value="joao.silva@example.com" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Plano de saúde</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Amil</option>
+                                <option>SulAmérica</option>
+                                <option>Unimed</option>
+                                <option>Bradesco Saúde</option>
+                            </select>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" value="Rua das Flores, 123" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('profileModal')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button type="button" onclick="updateProfile()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="border-b p-4 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Alterar Senha</h3>
+                <button onclick="closeModal('passwordModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Senha atual</label>
+                            <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nova senha</label>
+                            <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar nova senha</label>
+                            <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('passwordModal')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button type="button" onclick="updatePassword()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Alterar Senha
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="border-b p-4 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800" id="confirmTitle">Confirmar Presença</h3>
+                <button onclick="closeModal('confirmModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <p id="confirmMessage">Tem certeza que deseja confirmar sua presença na consulta?</p>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('confirmModal')" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="processConfirmation()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Notification -->
+    <div id="successNotification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center hidden">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="successMessage">Operação realizada com sucesso!</span>
+    </div>
+
+    <script>
+        // Toggle dropdowns
+        document.getElementById('notificationBtn').addEventListener('click', function() {
+            document.getElementById('notificationDropdown').classList.toggle('hidden');
+            document.getElementById('profileDropdown').classList.add('hidden');
+        });
+        
+        document.getElementById('profileBtn').addEventListener('click', function() {
+            document.getElementById('profileDropdown').classList.toggle('hidden');
+            document.getElementById('notificationDropdown').classList.add('hidden');
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#notificationBtn') && !event.target.closest('#notificationDropdown')) {
+                document.getElementById('notificationDropdown').classList.add('hidden');
+            }
+            
+            if (!event.target.closest('#profileBtn') && !event.target.closest('#profileDropdown')) {
+                document.getElementById('profileDropdown').classList.add('hidden');
+            }
+        });
+        
+        // Show section
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+        
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+        
+        // Appointment functions
+        function submitAppointment() {
+            closeModal('appointmentModal');
+            showSuccess('Consulta agendada com sucesso!');
+        }
+        
+        function confirmPresence() {
+            document.getElementById('confirmTitle').textContent = 'Confirmar Presença';
+            document.getElementById('confirmMessage').textContent = 'Tem certeza que deseja confirmar sua presença na consulta?';
+            document.getElementById('confirmModal').setAttribute('data-action', 'confirm');
+            openModal('confirmModal');
+        }
+        
+        function cancelAppointment() {
+            document.getElementById('confirmTitle').textContent = 'Cancelar Consulta';
+            document.getElementById('confirmMessage').textContent = 'Tem certeza que deseja cancelar esta consulta?';
+            document.getElementById('confirmModal').setAttribute('data-action', 'cancel');
+            openModal('confirmModal');
+        }
+        
+        function processConfirmation() {
+            const action = document.getElementById('confirmModal').getAttribute('data-action');
+            closeModal('confirmModal');
+            
+            if (action === 'confirm') {
+                showSuccess('Presença confirmada com sucesso!');
+            } else {
+                showSuccess('Consulta cancelada com sucesso!');
+            }
+        }
+        
+        // Profile functions
+        function updateProfile() {
+            closeModal('profileModal');
+            showSuccess('Perfil atualizado com sucesso!');
+        }
+        
+        function updatePassword() {
+            closeModal('passwordModal');
+            showSuccess('Senha alterada com sucesso!');
+        }
+        
+        // Chat functions
+        function openChat(doctorName) {
+            document.getElementById('chatPlaceholder').classList.add('hidden');
+            document.getElementById('chatWindow').classList.remove('hidden');
+            document.getElementById('chatDoctorName').textContent = doctorName;
+            
+            // Clear and load messages
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            // Sample messages
+            const messages = [
+                { sender: 'doctor', text: 'Olá João, como você está se sentindo?' },
+                { sender: 'patient', text: 'Olá doutor, estou me sentindo melhor, mas ainda com algumas dores.' },
+                { sender: 'doctor', text: 'Entendi. Vamos marcar um retorno para avaliar sua evolução.' }
+            ];
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `mb-4 flex ${msg.sender === 'doctor' ? 'justify-start' : 'justify-end'}`;
+                
+                const bubble = document.createElement('div');
+                bubble.className = `max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${msg.sender === 'doctor' ? 'bg-blue-100 text-gray-800' : 'bg-blue-600 text-white'}`;
+                bubble.textContent = msg.text;
+                
+                messageDiv.appendChild(bubble);
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                const chatMessages = document.getElementById('chatMessages');
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'mb-4 flex justify-end';
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-blue-600 text-white';
+                bubble.textContent = text;
+                
+                messageDiv.appendChild(bubble);
+                chatMessages.appendChild(messageDiv);
+                
+                // Clear input
+                input.value = '';
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Simulate doctor reply after 1 second
+                setTimeout(() => {
+                    const replyDiv = document.createElement('div');
+                    replyDiv.className = 'mb-4 flex justify-start';
+                    
+                    const replyBubble = document.createElement('div');
+                    replyBubble.className = 'max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-blue-100 text-gray-800';
+                    replyBubble.textContent = 'Recebi sua mensagem. Responderei em breve.';
+                    
+                    replyDiv.appendChild(replyBubble);
+                    chatMessages.appendChild(replyDiv);
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+        
+        // Receipt download
+        function downloadReceipt() {
+            showSuccess('Recibo baixado com sucesso!');
+        }
+        
+        // Success notification
+        function showSuccess(message) {
+            const notification = document.getElementById('successNotification');
+            document.getElementById('successMessage').textContent = message;
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Initialize - show dashboard by default
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('dashboard');
+        });
+    </script>
+</body>
+</html>

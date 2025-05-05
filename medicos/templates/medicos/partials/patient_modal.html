@@ -1,0 +1,37 @@
+<div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="flex justify-between items-center border-b p-4">
+        <h3 class="text-lg font-semibold" id="patient-modal-title">Novo Paciente</h3>
+        <button id="close-patient-modal" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="p-6">
+        <form id="patient-form">
+            <input type="hidden" id="patient-id">
+            <div class="mb-4">
+                <label for="patient-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <input type="text" id="patient-name" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="patient-cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                <input type="text" id="patient-cpf" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="patient-birth" class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <input type="date" id="patient-birth" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="patient-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <input type="email" id="patient-email" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="patient-phone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input type="tel" id="patient-phone" class="form-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </form>
+    </div>
+    <div class="flex justify-end border-t p-4">
+        <button id="cancel-patient" class="px-4 py-2 text-gray-600 hover:text-gray-800 mr-2">Cancelar</button>
+        <button id="save-patient" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar</button>
+    </div>
+</div>

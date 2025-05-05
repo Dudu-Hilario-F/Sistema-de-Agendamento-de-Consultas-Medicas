@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Paciente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .success-message {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .datepicker {
+            z-index: 1000 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-800">Sistema de Saúde</h1>
+            <p class="text-gray-600 mt-2">Cadastro exclusivo para pacientes</p>
+        </header>
+        
+        <!-- Registration Card -->
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-blue-700 px-6 py-4">
+                <h2 class="text-xl font-semibold text-white">Cadastre-se como paciente</h2>
+            </div>
+            
+            <!-- Success Message (Hidden by default) -->
+            <div id="successMessage" class="success-message px-6 py-4 hidden fade-in">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2 text-xl"></i>
+                    <p class="font-medium">Cadastro realizado com sucesso! Você será redirecionado para a página de login.</p>
+                </div>
+            </div>
+            
+            <!-- Registration Form -->
+            <form id="registrationForm" class="px-6 py-4">
+                <!-- Full Name -->
+                <div class="mb-4">
+                    <label for="fullName" class="block text-gray-700 font-medium mb-2">Nome completo <span class="text-red-500">*</span></label>
+                    <input type="text" id="fullName" name="fullName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                    <div id="fullNameError" class="error-message hidden">Por favor, insira seu nome completo.</div>
+                </div>
+                
+                <!-- Birth Date -->
+                <div class="mb-4">
+                    <label for="birthDate" class="block text-gray-700 font-medium mb-2">Data de nascimento <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="text" id="birthDate" name="birthDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 datepicker" placeholder="DD/MM/AAAA" required>
+                        <i class="fas fa-calendar-alt absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div id="birthDateError" class="error-message hidden">Por favor, insira uma data válida.</div>
+                </div>
+                
+                <!-- CPF -->
+                <div class="mb-4">
+                    <label for="cpf" class="block text-gray-700 font-medium mb-2">CPF <span class="text-red-500">*</span></label>
+                    <input type="text" id="cpf" name="cpf" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="000.000.000-00" required>
+                    <div id="cpfError" class="error-message hidden">Por favor, insira um CPF válido.</div>
+                    <div id="cpfExistsError" class="error-message hidden">Este CPF já está cadastrado.</div>
+                </div>
+                
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-medium mb-2">E-mail <span class="text-red-500">*</span></label>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                    <div id="emailError" class="error-message hidden">Por favor, insira um e-mail válido.</div>
+                    <div id="emailExistsError" class="error-message hidden">Este e-mail já está cadastrado.</div>
+                </div>
+                
+                <!-- Phone -->
+                <div class="mb-4">
+                    <label for="phone" class="block text-gray-700 font-medium mb-2">Telefone com DDD <span class="text-red-500">*</span></label>
+                    <input type="text" id="phone" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="(00) 00000-0000" required>
+                    <div id="phoneError" class="error-message hidden">Por favor, insira um telefone válido.</div>
+                </div>
+                
+                <!-- Health Plan -->
+                <div class="mb-4">
+                    <label for="healthPlan" class="block text-gray-700 font-medium mb-2">Plano de saúde <span class="text-red-500">*</span></label>
+                    <select id="healthPlan" name="healthPlan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                        <option value="" disabled selected>Selecione seu plano</option>
+                        <option value="Amil">Amil</option>
+                        <option value="Bradesco Saúde">Bradesco Saúde</option>
+                        <option value="SulAmérica">SulAmérica</option>
+                        <option value="Unimed">Unimed</option>
+                        <option value="Hapvida">Hapvida</option>
+                        <option value="Notredame">Notredame</option>
+                        <option value="Outro">Outro</option>
+                        <option value="Nenhum">Não possuo plano</option>
+                    </select>
+                    <div id="healthPlanError" class="error-message hidden">Por favor, selecione uma opção.</div>
+                </div>
+                
+                <!-- Address -->
+                <div class="mb-4">
+                    <label for="address" class="block text-gray-700 font-medium mb-2">Endereço completo <span class="text-red-500">*</span></label>
+                    <textarea id="address" name="address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                    <div id="addressError" class="error-message hidden">Por favor, insira seu endereço completo.</div>
+                </div>
+                
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="block text-gray-700 font-medium mb-2">Senha <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                        <i class="fas fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer" id="togglePassword"></i>
+                    </div>
+                    <div id="passwordError" class="error-message hidden">A senha deve ter pelo menos 6 caracteres.</div>
+                </div>
+                
+                <!-- Confirm Password -->
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Confirmar senha <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                        <i class="fas fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer" id="toggleConfirmPassword"></i>
+                    </div>
+                    <div id="confirmPasswordError" class="error-message hidden">As senhas não coincidem.</div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="mb-4">
+                    <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.01] active:scale-[0.99]">
+                        Cadastrar
+                    </button>
+                </div>
+                
+                <!-- Login Link -->
+                <div class="text-center text-gray-600">
+                    Já possui uma conta? <a href="#" class="text-blue-700 hover:underline">Faça login</a>
+                </div>
+            </form>
+            
+            <!-- Footer Note -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">
+                    Ao se cadastrar, você concorda com nossa <a href="#" class="text-blue-700 hover:underline">Política de Privacidade</a> e <a href="#" class="text-blue-700 hover:underline">Termos de Uso</a>. Seus dados serão utilizados exclusivamente para fins médicos e não serão compartilhados com terceiros sem sua autorização.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css">
+    <!-- Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/i18n/datepicker.pt-BR.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize masks
+            $('#cpf').mask('000.000.000-00', {reverse: true});
+            $('#phone').mask('(00) 00000-0000');
+            $('#birthDate').mask('00/00/0000');
+            
+            // Initialize datepicker
+            $('#birthDate').datepicker({
+                format: 'dd/mm/yyyy',
+                language: 'pt-BR',
+                autoclose: true,
+                todayHighlight: true,
+                endDate: 'today'
+            });
+            
+            // Toggle password visibility
+            $('#togglePassword').click(function() {
+                const passwordField = $('#password');
+                const icon = $(this);
+                
+                if (passwordField.attr('type') === 'password') {
+                    passwordField.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    passwordField.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+            
+            // Toggle confirm password visibility
+            $('#toggleConfirmPassword').click(function() {
+                const confirmPasswordField = $('#confirmPassword');
+                const icon = $(this);
+                
+                if (confirmPasswordField.attr('type') === 'password') {
+                    confirmPasswordField.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    confirmPasswordField.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+            
+            // Validate CPF
+            function validateCPF(cpf) {
+                cpf = cpf.replace(/[^\d]+/g,'');
+                if(cpf == '') return false;
+                
+                // Elimina CPFs invalidos conhecidos
+                if (cpf.length != 11 || 
+                    cpf == "00000000000" || 
+                    cpf == "11111111111" || 
+                    cpf == "22222222222" || 
+                    cpf == "33333333333" || 
+                    cpf == "44444444444" || 
+                    cpf == "55555555555" || 
+                    cpf == "66666666666" || 
+                    cpf == "77777777777" || 
+                    cpf == "88888888888" || 
+                    cpf == "99999999999")
+                    return false;
+                    
+                // Valida 1o digito
+                let add = 0;
+                for (let i=0; i < 9; i ++)
+                    add += parseInt(cpf.charAt(i)) * (10 - i);
+                let rev = 11 - (add % 11);
+                if (rev == 10 || rev == 11)
+                    rev = 0;
+                if (rev != parseInt(cpf.charAt(9)))
+                    return false;
+                    
+                // Valida 2o digito
+                add = 0;
+                for (let i = 0; i < 10; i ++)
+                    add += parseInt(cpf.charAt(i)) * (11 - i);
+                rev = 11 - (add % 11);
+                if (rev == 10 || rev == 11)
+                    rev = 0;
+                if (rev != parseInt(cpf.charAt(10)))
+                    return false;
+                    
+                return true;
+            }
+            
+            // Validate email
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            // Validate phone
+            function validatePhone(phone) {
+                const digits = phone.replace(/\D/g, '').length;
+                return digits >= 10 && digits <= 11;
+            }
+            
+            // Validate birth date
+            function validateBirthDate(date) {
+                const parts = date.split('/');
+                if (parts.length !== 3) return false;
+                
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10);
+                const year = parseInt(parts[2], 10);
+                
+                if (isNaN(day) || isNaN(month) || isNaN(year)) return false;
+                
+                // Check if date is valid
+                const dateObj = new Date(year, month - 1, day);
+                return dateObj.getFullYear() === year && 
+                       dateObj.getMonth() === month - 1 && 
+                       dateObj.getDate() === day;
+            }
+            
+            // Form submission
+            $('#registrationForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Reset all error states
+                $('.error-message').addClass('hidden');
+                $('input, select, textarea').removeClass('input-error');
+                
+                let isValid = true;
+                
+                // Validate full name
+                const fullName = $('#fullName').val().trim();
+                if (fullName === '') {
+                    $('#fullName').addClass('input-error');
+                    $('#fullNameError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate birth date
+                const birthDate = $('#birthDate').val().trim();
+                if (birthDate === '' || !validateBirthDate(birthDate)) {
+                    $('#birthDate').addClass('input-error');
+                    $('#birthDateError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate CPF
+                const cpf = $('#cpf').val().trim();
+                if (cpf === '' || !validateCPF(cpf)) {
+                    $('#cpf').addClass('input-error');
+                    $('#cpfError').removeClass('hidden');
+                    isValid = false;
+                } else {
+                    // In a real application, you would check if CPF exists in the database
+                    // For demo purposes, we'll simulate a check
+                    const existingCpfs = ['111.111.111-11', '222.222.222-22'];
+                    if (existingCpfs.includes(cpf)) {
+                        $('#cpf').addClass('input-error');
+                        $('#cpfExistsError').removeClass('hidden');
+                        isValid = false;
+                    }
+                }
+                
+                // Validate email
+                const email = $('#email').val().trim();
+                if (email === '' || !validateEmail(email)) {
+                    $('#email').addClass('input-error');
+                    $('#emailError').removeClass('hidden');
+                    isValid = false;
+                } else {
+                    // In a real application, you would check if email exists in the database
+                    // For demo purposes, we'll simulate a check
+                    const existingEmails = ['existing@email.com', 'test@test.com'];
+                    if (existingEmails.includes(email)) {
+                        $('#email').addClass('input-error');
+                        $('#emailExistsError').removeClass('hidden');
+                        isValid = false;
+                    }
+                }
+                
+                // Validate phone
+                const phone = $('#phone').val().trim();
+                if (phone === '' || !validatePhone(phone)) {
+                    $('#phone').addClass('input-error');
+                    $('#phoneError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate health plan
+                const healthPlan = $('#healthPlan').val();
+                if (!healthPlan) {
+                    $('#healthPlan').addClass('input-error');
+                    $('#healthPlanError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate address
+                const address = $('#address').val().trim();
+                if (address === '') {
+                    $('#address').addClass('input-error');
+                    $('#addressError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate password
+                const password = $('#password').val();
+                if (password.length < 6) {
+                    $('#password').addClass('input-error');
+                    $('#passwordError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // Validate confirm password
+                const confirmPassword = $('#confirmPassword').val();
+                if (confirmPassword !== password) {
+                    $('#confirmPassword').addClass('input-error');
+                    $('#confirmPasswordError').removeClass('hidden');
+                    isValid = false;
+                }
+                
+                // If form is valid, simulate successful registration
+                if (isValid) {
+                    // In a real application, you would send the data to the server here
+                    console.log('Form submitted successfully:', {
+                        fullName,
+                        birthDate,
+                        cpf,
+                        email,
+                        phone,
+                        healthPlan,
+                        address,
+                        password
+                    });
+                    
+                    // Show success message
+                    $('#successMessage').removeClass('hidden');
+                    $('#registrationForm').addClass('hidden');
+                    
+                    // Redirect to login after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                }
+            });
+            
+            // Add input validation on blur
+            $('input, select, textarea').on('blur', function() {
+                const $input = $(this);
+                const inputId = $input.attr('id');
+                
+                // Reset error state
+                $input.removeClass('input-error');
+                $(`#${inputId}Error`).addClass('hidden');
+                $(`#${inputId}ExistsError`).addClass('hidden');
+                
+                // Validate based on input type
+                if ($input.val().trim() === '' && $input.prop('required')) {
+                    $input.addClass('input-error');
+                    $(`#${inputId}Error`).removeClass('hidden');
+                    return;
+                }
+                
+                switch(inputId) {
+                    case 'cpf':
+                        if (!validateCPF($input.val().trim())) {
+                            $input.addClass('input-error');
+                            $('#cpfError').removeClass('hidden');
+                        }
+                        break;
+                    case 'email':
+                        if (!validateEmail($input.val().trim())) {
+                            $input.addClass('input-error');
+                            $('#emailError').removeClass('hidden');
+                        }
+                        break;
+                    case 'phone':
+                        if (!validatePhone($input.val().trim())) {
+                            $input.addClass('input-error');
+                            $('#phoneError').removeClass('hidden');
+                        }
+                        break;
+                    case 'birthDate':
+                        if (!validateBirthDate($input.val().trim())) {
+                            $input.addClass('input-error');
+                            $('#birthDateError').removeClass('hidden');
+                        }
+                        break;
+                    case 'password':
+                        if ($input.val().length < 6) {
+                            $input.addClass('input-error');
+                            $('#passwordError').removeClass('hidden');
+                        }
+                        break;
+                    case 'confirmPassword':
+                        if ($input.val() !== $('#password').val()) {
+                            $input.addClass('input-error');
+                            $('#confirmPasswordError').removeClass('hidden');
+                        }
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
