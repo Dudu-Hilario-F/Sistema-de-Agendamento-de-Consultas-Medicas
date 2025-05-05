@@ -5,4 +5,5 @@ app_name = 'pacientes'
 
 urlpatterns = [
     path('criar-conta/', views.criar_conta, name='criar_conta'),
+    path('paciente/', views.paciente_page, name='paciente_page'),
 ]
